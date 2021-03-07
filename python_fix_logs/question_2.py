@@ -2,6 +2,7 @@ import os
 import re
 import mixins
 import settings
+import xlsxwriter
 
 
 SYMBOL_TAG = '55=ES'
@@ -14,8 +15,9 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
     (Tag 35=8) and examines the CumQty field (Tag 14).
     """
 
-    def __init__(self, symbol_tag: str):
+    def __init__(self, symbol_tag: str, excel_filename: str = ''):
         self.symbol_tag = symbol_tag
+        self.excel_filename = excel_filename
         self.execution_report_tag = '35=8'
 
     def execute_report(self):
@@ -61,7 +63,8 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
 
             fix_file.close()
 
-        return self.finish_report(report)
+        report = self.finish_report(report)
+        self.save_to_excel(report)
 
     def finish_report(self, report):
         """
@@ -83,16 +86,25 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
         # Sort the dictionary by key/Order Id, because it's not guaranteed to be in order.
         # (report get's reassigned as list of 2-tuples)
         report = sorted(report.items())
-
-        # # Test
-        # previous_id = '0'
-        # for order_id, qty_list in report:
-        #     assert previous_id < order_id, f'assert {previous_id} < {order_id}'
-        #     previous_id = order_id
-        #     print(order_id, qty_list)
-
         return report
 
+    def save_to_excel(self, report):
+        # Create a workbook and add a worksheet.
+        workbook = xlsxwriter.Workbook(self.output_path(__file__))
+        worksheet = workbook.add_worksheet()
 
-report = ExecutionReportAnalyzer(SYMBOL_TAG).execute_report()
-print(report)
+        # Start from the first cell. Rows and columns are zero indexed.
+        row = 0
+        col = 0
+        worksheet.write(row, col, 'Order Id')
+        worksheet.write(row, col + 1, 'Cumulative Quantity')
+
+        # Iterate over the data and write it out row by row.
+        for order_id, qty in report:
+            row += 1
+            worksheet.write(row, col, order_id)
+            worksheet.write(row, col + 1, qty)
+
+        workbook.close()
+
+ExecutionReportAnalyzer(SYMBOL_TAG).execute_report()
