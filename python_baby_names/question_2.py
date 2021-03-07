@@ -1,5 +1,5 @@
-import os
 import mixins
+import os
 import pandas as pd
 import settings
 
@@ -64,8 +64,6 @@ class Script(mixins.BabyNamesMixin):
                 female_name = tag.next_sibling.text.strip()
                 female_names[female_name] = rank_num
 
-            # Example:
-            # https://www.geeksforgeeks.org/how-to-add-one-row-in-an-existing-pd-dataframe/
             # Append a new row to the male's table.
             male_df.loc[len(male_df.index)] = \
                 self.add_data_to_row(male_names, [year])
@@ -98,6 +96,7 @@ class Script(mixins.BabyNamesMixin):
             )
             row = row + len(df.index) + 2
         writer.save()
+
 
 Script(
     NAMES_IN_REPORT,

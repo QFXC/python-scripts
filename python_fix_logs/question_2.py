@@ -1,6 +1,6 @@
+import mixins
 import os
 import re
-import mixins
 import settings
 import xlsxwriter
 
@@ -82,7 +82,6 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
                 raise TypeError(
                     str(e) + '\nThis means that cumulative quantity was not in one of the messages.')
 
-
         # Sort the dictionary by key/Order Id, because it's not guaranteed to be in order.
         # (report get's reassigned as list of 2-tuples)
         report = sorted(report.items())
@@ -106,5 +105,6 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
             worksheet.write(row, col + 1, qty)
 
         workbook.close()
+
 
 ExecutionReportAnalyzer(SYMBOL_TAG).execute_report()

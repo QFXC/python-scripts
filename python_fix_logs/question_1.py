@@ -1,6 +1,6 @@
+import mixins
 import os
 import re
-import mixins
 import settings
 import xlsxwriter
 
