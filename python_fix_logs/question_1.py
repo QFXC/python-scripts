@@ -2,6 +2,7 @@ import os
 import re
 import mixins
 import settings
+import xlsxwriter
 
 from enum import Enum
 
@@ -31,7 +32,8 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
     the categories that it's instantiated with.
     """
 
-    def __init__(self, categories_needed: list):
+    def __init__(self, categories_needed: list, excel_filename: str = '',):
+        self.excel_filename = excel_filename
         # Hard coding the execution_report_tag because it will always be
         # needed when traversing through FIX logs searching and analyzing
         # Tag 39. Every time a message has Tag 39 it has Tag 35=8.
@@ -80,12 +82,30 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
                                 continue
             fix_file.close()
 
-        return self.report
+        self.save_to_excel()
 
-report = OrderStatusAnalyzer([
+    def save_to_excel(self):
+        # Create a workbook and add a worksheet.
+        workbook = xlsxwriter.Workbook(self.output_path(__file__))
+        worksheet = workbook.add_worksheet()
+
+        # Start from the first cell. Rows and columns are zero indexed.
+        row = 0
+        col = 0
+        worksheet.write(row, col, 'Category')
+        worksheet.write(row, col + 1, 'Count')
+
+        # Iterate over the data and write it out row by row.
+        for category, count in self.report.items():
+            row += 1
+            worksheet.write(row, col, category)
+            worksheet.write(row, col + 1, count)
+
+        workbook.close()
+
+
+OrderStatusAnalyzer([
     OrdStatus.FILLED,
     OrdStatus.PARTIALLY_FILLED,
     OrdStatus.CANCELLED,
 ]).execute_report()
-
-print(report)
