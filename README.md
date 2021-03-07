@@ -16,4 +16,4 @@ These scripts have dependencies as seen in the Pipfile (Beautiful Soup, Pandas, 
 
     * ```python ./python_fix_logs/question_1.py```
     * ```python ./python_fix_logs/question_2.py```
-1. * ```exit```
+1. ```exit```
