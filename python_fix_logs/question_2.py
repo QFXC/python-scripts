@@ -9,8 +9,8 @@ SYMBOL_TAG = '55=ES'
 
 class ExecutionReportAnalyzer(mixins.FixLogMixin):
     """
-    This script that processes the FIX log files and reports a summary of the
-    quantity filled on a specific symbol_tag. It uses Execution reports
+    This script processes the FIX log files and reports a summary of the
+    quantity filled on a specific Symbol. It uses execution reports
     (Tag 35=8) and examines the CumQty field (Tag 14).
     """
 

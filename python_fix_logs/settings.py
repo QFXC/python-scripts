@@ -5,7 +5,7 @@ FILE_TYPE = '.log'
 # The useful tags for each message start at character index 34.
 START_INDEX = 34
 
-# DELIMITER represents what the tags are separated by.
+# DELIMITER represents what the message tags are separated by.
 DELIMITER = '\x01'
 
 RELATIVE_PATH = './python_fix_logs'

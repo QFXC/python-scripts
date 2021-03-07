@@ -28,7 +28,7 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
     """
     This script processes the FIX log files in the directory and reports a
     summary of the number of orders broken down by order status (Tag 39) in
-    categories filled (39=2), partially filled (39=1), and canceled (39=4)
+    the categories that it's instantiated with.
     """
 
     def __init__(self, categories_needed: list):
@@ -45,7 +45,6 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
         for value in categories_needed:
             if isinstance(value, Enum):
                 value = value.value
-            # raise Exception(type(value))
             report[f'{self.order_status_tag}={value}'] = 0
         self.report = report
 
