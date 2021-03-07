@@ -21,11 +21,7 @@ class Script(mixins.BabyNamesMixin):
 
     def __init__(self, name_quantity_needed, excel_filename: str = '',):
         self.name_quantity_needed = name_quantity_needed
-        if not excel_filename:
-            excel_filename = os.path.basename(__file__).replace('.py', '_report.xlsx')
-            output_path = (
-                os.path.dirname(os.path.abspath(__file__)) + '\\' + excel_filename)
-        self.output_path = output_path
+        self.excel_filename = excel_filename
 
     def execute_report(self):
         report = {
@@ -70,7 +66,7 @@ class Script(mixins.BabyNamesMixin):
 
     def save_to_excel(self, report):
         # Create a workbook and add a worksheet.
-        workbook = xlsxwriter.Workbook(self.output_path)
+        workbook = xlsxwriter.Workbook(self.output_path(__file__))
         worksheet = workbook.add_worksheet()
 
         # Start from the first cell. Rows and columns are zero indexed.

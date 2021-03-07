@@ -19,11 +19,7 @@ class Script(mixins.BabyNamesMixin):
     def __init__(self, names_in_report: list, excel_filename: str = '',
                  excel_sheetname: str = ''):
         self.names_in_report = names_in_report
-        if not excel_filename:
-            excel_filename = os.path.basename(__file__).replace('.py', '_report.xlsx')
-            output_path = (
-                os.path.dirname(os.path.abspath(__file__)) + '\\' + excel_filename)
-        self.output_path = output_path
+        self.excel_filename = excel_filename
         self.excel_sheetname = excel_sheetname
 
     def execute_report(self):
@@ -91,7 +87,7 @@ class Script(mixins.BabyNamesMixin):
         return new_row_data
 
     def save_to_excel(self, dataframes):
-        writer = pd.ExcelWriter(self.output_path, engine='xlsxwriter')
+        writer = pd.ExcelWriter(self.output_path(__file__), engine='xlsxwriter')
         row = 0
         for df in dataframes:
             df.to_excel(
