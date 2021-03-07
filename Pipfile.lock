@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "91f251ecc9ac0e48debf6b5ca3a774b54d7ccdc9c671982f7b4495caee2504e9"
+            "sha256": "4a37889d0ac50a8f82bdb9700bdbb153e96c7d259ee4d6768af3f7858e3a3c01"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -107,6 +107,14 @@
             ],
             "markers": "python_version >= '3.0'",
             "version": "==2.2"
+        },
+        "xlsxwriter": {
+            "hashes": [
+                "sha256:9b1ade2d1ba5d9b40a6d1de1d55ded4394ab8002718092ae80a08532c2add2e6",
+                "sha256:b807c2d3e379bf6a925f472955beef3e07495c1bac708640696876e68675b49b"
+            ],
+            "index": "pypi",
+            "version": "==1.3.7"
         }
     },
     "develop": {}
