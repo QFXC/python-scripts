@@ -19,7 +19,7 @@ class Script(mixins.BabyNamesMixin):
     male_name_key = 'male_names'
     female_name_key = 'female_names'
 
-    def __init__(self, name_quantity_needed, excel_filename: str = '',):
+    def __init__(self, name_quantity_needed, excel_filename: str = ''):
         self.name_quantity_needed = name_quantity_needed
         self.excel_filename = excel_filename
 

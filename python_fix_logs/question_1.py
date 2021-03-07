@@ -32,7 +32,7 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
     the categories that it's instantiated with.
     """
 
-    def __init__(self, categories_needed: list, excel_filename: str = '',):
+    def __init__(self, categories_needed: list, excel_filename: str = ''):
         self.excel_filename = excel_filename
         # Hard coding the execution_report_tag because it will always be
         # needed when traversing through FIX logs searching and analyzing

@@ -9,7 +9,7 @@ class BabyNamesMixin:
     header_tags = settings.HEADER_TAGS
     excel_filename = ''
 
-    def output_path(self, file_dundar):
+    def output_path(self, file_dundar: str):
         excel_filename = (
             self.excel_filename or
             os.path.basename(file_dundar).replace('.py', '_report.xlsx')
