@@ -1,6 +1,7 @@
 import os
 import mixins
 import settings
+import xlsxwriter
 
 from bs4 import BeautifulSoup
 
@@ -18,13 +19,18 @@ class Script(mixins.BabyNamesMixin):
     male_name_key = 'male_names'
     female_name_key = 'female_names'
 
-    def __init__(self, name_quantity_needed):
+    def __init__(self, name_quantity_needed, excel_filename: str = '',):
         self.name_quantity_needed = name_quantity_needed
+        if not excel_filename:
+            excel_filename = os.path.basename(__file__).replace('.py', '_report.xlsx')
+            output_path = (
+                os.path.dirname(os.path.abspath(__file__)) + '\\' + excel_filename)
+        self.output_path = output_path
 
     def execute_report(self):
         report = {
-            self.male_name_key: [],
-            self.female_name_key: [],
+            self.male_name_key: {},
+            self.female_name_key: {},
         }
 
         filenames, available_years = self.get_filename_info()
@@ -56,13 +62,45 @@ class Script(mixins.BabyNamesMixin):
                 female_name = tag.next_sibling.text.strip()
                 female_names.append(female_name)
 
-            report[self.male_name_key].append({year: male_names})
-            report[self.female_name_key].append({year: female_names})
+            report[self.male_name_key][year] = male_names
+            report[self.female_name_key][year] = female_names
             html_file.close()
 
-        return report
+        self.save_to_excel(report)
+
+    def save_to_excel(self, report):
+        # Create a workbook and add a worksheet.
+        workbook = xlsxwriter.Workbook(self.output_path)
+        worksheet = workbook.add_worksheet()
+
+        # Start from the first cell. Rows and columns are zero indexed.
+        row = 0
+        col = 0
+
+        # Iterate over the data and write it out row by row.
+        worksheet.write(row, col, 'Year')
+        rank_list = [1, 2, 3, 4, 5]
+        for rank in rank_list:
+            col += 1
+            worksheet.write(row, col, 'Rank ' + str(rank))
+
+        first_col = 0
+
+        for mf, year_list in report.items():
+            row += 1
+            # Write a row saying whether this list will be males or females.
+            worksheet.write(row, first_col, mf)
+            row += 1
+
+            # Write a new row that contains the year and names.
+            for year, name_list in year_list.items():
+                worksheet.write(row, first_col, year)
+                col = first_col + 1
+                for i, name in enumerate(name_list):
+                    worksheet.write(row, i + 1, name)
+                row += 1
+
+        workbook.close()
 
 
-report = Script(NAME_QUANTITY_NEEDED).execute_report()
-
-print(report)
+Script(NAME_QUANTITY_NEEDED).execute_report()
