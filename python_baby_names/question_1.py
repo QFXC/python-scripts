@@ -76,7 +76,7 @@ class Script(mixins.BabyNamesMixin):
 
         # Iterate over the data and write it out row by row.
         worksheet.write(row, col, 'Year')
-        rank_list = [1, 2, 3, 4, 5]
+        rank_list = [i + 1 for i in range(self.name_quantity_needed)]
         for rank in rank_list:
             col += 1
             worksheet.write(row, col, 'Rank ' + str(rank))
