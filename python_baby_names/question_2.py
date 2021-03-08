@@ -15,6 +15,7 @@ class Script(mixins.BabyNamesMixin):
     This script details the rankings over the available years for specific
     baby names.
     """
+
     def __init__(self, names_in_report: list, excel_filename: str = '',
                  excel_sheetname: str = ''):
         if excel_filename:
@@ -55,7 +56,7 @@ class Script(mixins.BabyNamesMixin):
             male_names = {}
             female_names = {}
             for row in rows:
-                # For most of the html files, the table rows are missing the
+                # For most of the HTML files, the table rows are missing the
                 # closing tr tags, so I am calling "next" until I get the
                 # correct element.
                 rank_el = row.next.next
@@ -87,7 +88,7 @@ class Script(mixins.BabyNamesMixin):
         return new_row_data
 
     def save_to_excel(self, dataframes):
-        output_path = self.output_path(__file__)
+        output_path = self.get_output_path(__file__)
         writer = pd.ExcelWriter(output_path, engine='xlsxwriter')
         row = 0
         for df in dataframes:

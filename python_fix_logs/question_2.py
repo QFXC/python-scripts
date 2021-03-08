@@ -33,8 +33,8 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
         for filename in filenames:
             fix_file = open(f'{settings.RELATIVE_PATH}/{filename}', 'r')
             for message in fix_file.readlines():
-                # Search for "35=8" first because it's always in near beginning
-                # of the message.
+                # Search for "35=8" first because it's always near the
+                # beginning of the message.
                 # Proof: https://www.onixs.biz/fix-dictionary/4.2/tagnum_35.html
                 end_index =  min([settings.START_INDEX * 2, len(message) - 1])
                 message_beginning = message[settings.START_INDEX: end_index]
@@ -93,7 +93,7 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
 
     def save_to_excel(self, report):
         # Create a workbook and add a worksheet.
-        output_path = self.output_path(__file__)
+        output_path = self.get_output_path(__file__)
         workbook = xlsxwriter.Workbook(output_path)
         worksheet = workbook.add_worksheet()
 

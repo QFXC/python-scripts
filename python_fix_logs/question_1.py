@@ -89,7 +89,7 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
 
     def save_to_excel(self):
         # Create a workbook and add a worksheet.
-        output_path = self.output_path(__file__)
+        output_path = self.get_output_path(__file__)
         workbook = xlsxwriter.Workbook(output_path)
         worksheet = workbook.add_worksheet()
 
