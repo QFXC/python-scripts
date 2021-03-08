@@ -17,8 +17,11 @@ class Script(mixins.BabyNamesMixin):
     """
     def __init__(self, names_in_report: list, excel_filename: str = '',
                  excel_sheetname: str = ''):
-        self.names_in_report = names_in_report
+        if excel_filename:
+            assert excel_filename[-5:] == '.xlsx', (
+                'The excel_filename must end with ".xlsx"')
         self.excel_filename = excel_filename
+        self.names_in_report = names_in_report
         self.excel_sheetname = excel_sheetname
 
     def execute_report(self):

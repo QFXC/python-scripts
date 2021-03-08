@@ -33,6 +33,9 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
     """
 
     def __init__(self, categories_needed: list, excel_filename: str = ''):
+        if excel_filename:
+            assert excel_filename[-5:] == '.xlsx', (
+                'The excel_filename must end with ".xlsx"')
         self.excel_filename = excel_filename
         # Hard coding the execution_report_tag because it will always be
         # needed when traversing through FIX logs searching and analyzing

@@ -16,8 +16,11 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
     """
 
     def __init__(self, symbol_tag: str, excel_filename: str = ''):
-        self.symbol_tag = symbol_tag
+        if excel_filename:
+            assert excel_filename[-5:] == '.xlsx', (
+                'The excel_filename must end with ".xlsx"')
         self.excel_filename = excel_filename
+        self.symbol_tag = symbol_tag
         self.execution_report_tag = '35=8'
 
     def execute_report(self):

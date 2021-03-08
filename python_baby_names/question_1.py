@@ -20,8 +20,11 @@ class Script(mixins.BabyNamesMixin):
     female_name_key = 'female_names'
 
     def __init__(self, name_quantity_needed: int, excel_filename: str = ''):
-        self.name_quantity_needed = name_quantity_needed
+        if excel_filename:
+            assert excel_filename[-5:] == '.xlsx', (
+                'The excel_filename must end with ".xlsx"')
         self.excel_filename = excel_filename
+        self.name_quantity_needed = name_quantity_needed
 
     def execute_report(self):
         report = {
