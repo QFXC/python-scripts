@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 
 
 NAMES_IN_REPORT = ["Ryan", "Ben", "Eugene"]
-EXCEL_FILENAME = 'report.xlsx'
 EXCEL_SHEETNAME = 'Great Report'
 
 
@@ -54,8 +53,8 @@ class Script(mixins.BabyNamesMixin):
             female_names = {}
             for row in rows:
                 # For most of the html files, the table rows are missing the
-                # closing tr tags, so I am calling "next" until I get the correct
-                # element.
+                # closing tr tags, so I am calling "next" until I get the
+                # correct element.
                 rank_el = row.next.next
                 rank_num = int(str(rank_el))
                 tag = rank_el.next

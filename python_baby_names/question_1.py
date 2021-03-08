@@ -13,13 +13,13 @@ NAME_QUANTITY_NEEDED = 5
 class Script(mixins.BabyNamesMixin):
     """
     This script scrapes all HTML files in the directory and reports
-    the top 5 names for each year for both males and females.
+    the top names for each year for both males and females.
     """
 
     male_name_key = 'male_names'
     female_name_key = 'female_names'
 
-    def __init__(self, name_quantity_needed, excel_filename: str = ''):
+    def __init__(self, name_quantity_needed: int, excel_filename: str = ''):
         self.name_quantity_needed = name_quantity_needed
         self.excel_filename = excel_filename
 
@@ -49,7 +49,7 @@ class Script(mixins.BabyNamesMixin):
             male_names = []
             female_names = []
             for row in rows:
-                # For most of the html files, the table rows are missing the
+                # For most of the HTML files, the table rows are missing the
                 # closing tr tags, so I am calling "next" until I get the
                 # correct element.
                 tag = row.next.next.next

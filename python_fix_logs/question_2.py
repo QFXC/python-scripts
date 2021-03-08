@@ -80,7 +80,8 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
                 # Example Exception:
                 #   TypeError: '>' not supported between instances of 'NoneType' and 'int'
                 raise TypeError(
-                    str(e) + '\nThis means that cumulative quantity was not in one of the messages.')
+                    str(e) +
+                    '\nThis means that cumulative quantity was not in one of the messages.')
 
         # Sort the dictionary by key/Order Id, because it's not guaranteed to be in order.
         # (report get's reassigned as list of 2-tuples)
