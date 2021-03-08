@@ -66,7 +66,8 @@ class Script(mixins.BabyNamesMixin):
 
     def save_to_excel(self, report):
         # Create a workbook and add a worksheet.
-        workbook = xlsxwriter.Workbook(self.output_path(__file__))
+        output_path = self.output_path(__file__)
+        workbook = xlsxwriter.Workbook(output_path)
         worksheet = workbook.add_worksheet()
 
         # Start from the first cell. Rows and columns are zero indexed.
@@ -97,6 +98,7 @@ class Script(mixins.BabyNamesMixin):
                 row += 1
 
         workbook.close()
+        print(f'Created: {output_path}')
 
 
 Script(NAME_QUANTITY_NEEDED).execute_report()

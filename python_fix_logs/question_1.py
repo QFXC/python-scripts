@@ -86,7 +86,8 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
 
     def save_to_excel(self):
         # Create a workbook and add a worksheet.
-        workbook = xlsxwriter.Workbook(self.output_path(__file__))
+        output_path = self.output_path(__file__)
+        workbook = xlsxwriter.Workbook(output_path)
         worksheet = workbook.add_worksheet()
 
         # Start from the first cell. Rows and columns are zero indexed.
@@ -102,6 +103,7 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
             worksheet.write(row, col + 1, count)
 
         workbook.close()
+        print(f'Created: {output_path}')
 
 
 OrderStatusAnalyzer([

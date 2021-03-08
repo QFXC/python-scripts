@@ -85,7 +85,8 @@ class Script(mixins.BabyNamesMixin):
         return new_row_data
 
     def save_to_excel(self, dataframes):
-        writer = pd.ExcelWriter(self.output_path(__file__), engine='xlsxwriter')
+        output_path = self.output_path(__file__)
+        writer = pd.ExcelWriter(output_path, engine='xlsxwriter')
         row = 0
         for df in dataframes:
             df.to_excel(
@@ -96,6 +97,7 @@ class Script(mixins.BabyNamesMixin):
             )
             row = row + len(df.index) + 2
         writer.save()
+        print(f'Created: {output_path}')
 
 
 Script(
