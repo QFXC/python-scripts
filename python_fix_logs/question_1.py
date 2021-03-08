@@ -61,17 +61,17 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
             fix_file = open(f'{settings.RELATIVE_PATH}/{filename}', 'r')
             for message in fix_file.readlines():
                 # Only tag "35-8" has order statuses (39=2, 39=1, and 39=4).
-                # Search for "35=8" first because it's always near the beginning
-                # of the message.
+                # Search for "35=8" first because it's always near the
+                # beginning of the message.
                 # Proof: https://www.onixs.biz/fix-dictionary/4.2/tagnum_35.html
                 end_index =  min([settings.START_INDEX * 2, len(message) - 1])
                 message_beginning = message[settings.START_INDEX: end_index]
                 if self.execution_report_tag in message_beginning:
                     tag_list = re.split(settings.DELIMITER, message)
 
-                    # Only report messages with tag in report.
-                    # Traverse backwards because that tag is always closer to
-                    # the end of the message.
+                    # Only count messages that contain the order_status_tag (39).
+                    # Traverse the tag_list backwards because it is always
+                    # closer to the end of the message.
                     index = len(tag_list) - 1
                     while index > -1:
                         tag = tag_list[index]

@@ -42,8 +42,8 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
                     tag_list = re.split(settings.DELIMITER, message)
 
                     # Only report messages with self.symbol_tag "55=ES".
-                    # Traverse backwards because that tag is always closer to
-                    # the end of the message.
+                    # Traverse the tag_list backwards because that tag is
+                    # always closer to the end of the message.
                     index = len(tag_list) - 1
                     while index > -1:
                         if tag_list[index] != self.symbol_tag:
@@ -103,6 +103,7 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
         row = 0
         col = 0
 
+        # Iterate over the data and write it out row by row.
         worksheet.write(row, col, 'Cumulative Quantity Sum')
         row += 1
         worksheet.write(row, col, cumulative_qty_sum)
@@ -112,7 +113,6 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
         worksheet.write(row, col + 1, 'Cumulative Quantity')
         print(f'Cumulative Quantity for symbol "{self.symbol_tag}": {cumulative_qty_sum}')
 
-        # Iterate over the data and write it out row by row.
         for order_id, qty in report:
             row += 1
             worksheet.write(row, col, order_id)

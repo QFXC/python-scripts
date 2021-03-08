@@ -4,7 +4,20 @@ import settings
 
 class FixLogMixin:
 
-    def get_output_path(self, file_dundar: str):
+    excel_filename = ''
+
+    def get_output_path(self, file_dundar: str) -> str:
+        """
+        Returns the path of the file (including the filename within the path)
+        that will be created.
+
+        Args:
+            file_dundar (str):
+                The __file__ value that's available in every Python file.
+
+        Returns:
+            [str]: The path of the output.
+        """
         excel_filename = (
             self.excel_filename or
             os.path.basename(file_dundar).replace('.py', '_report.xlsx')
@@ -15,7 +28,7 @@ class FixLogMixin:
 
     def get_filenames(self) -> list:
         """
-        Returns the filenames from the directory that are needed.
+        Returns only the the filenames from the directory that are needed.
 
         Returns:
             list

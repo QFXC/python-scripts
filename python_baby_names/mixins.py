@@ -9,7 +9,18 @@ class BabyNamesMixin:
     header_tags = settings.HEADER_TAGS
     excel_filename = ''
 
-    def get_output_path(self, file_dundar: str):
+    def get_output_path(self, file_dundar: str) -> str:
+        """
+        Returns the path of the file (including the filename within the path)
+        that will be created.
+
+        Args:
+            file_dundar (str):
+                The __file__ value that's available in every Python file.
+
+        Returns:
+            [str]: The path of the output.
+        """
         excel_filename = (
             self.excel_filename or
             os.path.basename(file_dundar).replace('.py', '_report.xlsx')
@@ -19,6 +30,13 @@ class BabyNamesMixin:
         return output_path
 
     def get_filename_info(self) -> tuple:
+        """
+        Returns a 2-tuple of filenames within the directory and the available
+        years that are within those filenames.
+
+        Returns:
+            tuple: filenames, available years
+        """
         available_years = []
 
         # Put the HTML filenames into a list.
@@ -45,6 +63,14 @@ class BabyNamesMixin:
         return filenames, available_years
 
     def validate_year(self, year: int, soup):
+        """
+        Validates that the year in the HTML file is the same as the year in the
+        file's name.
+
+        Args:
+            year (int)
+            soup (BeautifulSoup)
+        """
 
         for tag in self.header_tags:
             title_el = soup.select_one(tag)
@@ -66,12 +92,28 @@ class BabyNamesMixin:
             f'Year "{year_in_title}" !== "{year}"')
 
     def get_table(self, soup):
+        """
+        Finds the correct table within BeautifulSoup object and validates it
+        before it is returned.
+
+        Args:
+            soup (BeautifulSoup): The soup of the entire page.
+
+        Returns:
+            [BeautifulSoup]: The HTML table element within the soup.
+        """
         # In all cases, the data we need is in the 3rd table.
         table = soup.find_all('table')[2]
         self.validate_table_columns(table)
         return table
 
     def validate_table_columns(self, table):
+        """
+        Validate that the table's columns are in the expected order.
+
+        Args:
+            table (BeautifulSoup): The table object found in the HTML file.
+        """
         # Make sure the order of the columns are what is expected.
         table_header = table.select_one('tr')
         actual_column_order = []
