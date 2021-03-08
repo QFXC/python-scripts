@@ -90,7 +90,7 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
     def save_to_excel(self, report):
         # Create a workbook and add a worksheet.
         output_path = self.output_path(__file__)
-        workbook = xlsxwriter.Workbook()
+        workbook = xlsxwriter.Workbook(output_path)
         worksheet = workbook.add_worksheet()
 
         # Start from the first cell. Rows and columns are zero indexed.
