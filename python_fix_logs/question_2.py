@@ -66,8 +66,7 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
 
             fix_file.close()
 
-        report = self.finish_report(report)
-        self.save_to_excel(report)
+        self.save_to_excel(*self.finish_report(report))
 
     def finish_report(self, report):
         """
@@ -76,9 +75,12 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
         by Order Id, Tag 11) can receive multiple execution reports.
         Intermediate quantities should not be counted multiple times.
         """
+        cumulative_qty_sum = 0
         for order_id, qty_list in report.items():
             try:
-                report[order_id] = max(qty_list)
+                cumulative_qty = max(qty_list)
+                cumulative_qty_sum += cumulative_qty
+                report[order_id] = cumulative_qty
             except TypeError as e:
                 # Example Exception:
                 #   TypeError: '>' not supported between instances of 'NoneType' and 'int'
@@ -89,9 +91,9 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
         # Sort the dictionary by key/Order Id, because it's not guaranteed to be in order.
         # (report get's reassigned as list of 2-tuples)
         report = sorted(report.items())
-        return report
+        return cumulative_qty_sum, report
 
-    def save_to_excel(self, report):
+    def save_to_excel(self, cumulative_qty_sum: int, report: dict):
         # Create a workbook and add a worksheet.
         output_path = self.get_output_path(__file__)
         workbook = xlsxwriter.Workbook(output_path)
@@ -100,8 +102,15 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
         # Start from the first cell. Rows and columns are zero indexed.
         row = 0
         col = 0
+
+        worksheet.write(row, col, 'Cumulative Quantity Sum')
+        row += 1
+        worksheet.write(row, col, cumulative_qty_sum)
+        row += 2
+
         worksheet.write(row, col, 'Order Id')
         worksheet.write(row, col + 1, 'Cumulative Quantity')
+        print(f'Cumulative Quantity for symbol "{self.symbol_tag}": {cumulative_qty_sum}')
 
         # Iterate over the data and write it out row by row.
         for order_id, qty in report:
@@ -110,7 +119,7 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
             worksheet.write(row, col + 1, qty)
 
         workbook.close()
-        print(f'Created: {output_path}')
+        print(f'Detailed Report Created: {output_path}')
 
 
 ExecutionReportAnalyzer(SYMBOL_TAG).execute_report()
