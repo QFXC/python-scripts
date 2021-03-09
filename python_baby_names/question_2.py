@@ -26,14 +26,16 @@ class Script(mixins.BabyNamesMixin):
         self.excel_sheetname = excel_sheetname
 
     def execute_report(self):
-        columns = ['Year'] + self.names_in_report
-        male_df = pd.DataFrame(columns=columns)
-        male_df.columns = pd.MultiIndex.from_tuples(
-            zip(['Male Name Rankings Per Year', '', '', ''], male_df.columns))
+        # Instantiate the table/dataframe for males.
+        header_2 = ['Year'] + self.names_in_report
+        male_df = pd.DataFrame(columns=header_2)
+        header_1 = ['Male Name Rankings Per Year'] + len(self.names_in_report) * ['']
+        male_df.columns = pd.MultiIndex.from_tuples(zip(header_1, header_2))
 
-        female_df = pd.DataFrame(columns=columns)
-        female_df.columns = pd.MultiIndex.from_tuples(
-            zip(['Female Name Rankings Per Year', '', '', ''], female_df.columns))
+        # Instantiate the table/dataframe for females.
+        female_df = pd.DataFrame(columns=header_2)
+        header_1 = ['Female Name Rankings Per Year'] + len(self.names_in_report) * ['']
+        female_df.columns = pd.MultiIndex.from_tuples(zip(header_1, header_2))
 
         filenames, available_years = self.get_filename_info()
 
