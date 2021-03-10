@@ -1,7 +1,9 @@
+import collections
 import mixins
 import os
 import pandas as pd
 import settings
+
 
 from bs4 import BeautifulSoup
 
@@ -18,6 +20,8 @@ class Script(mixins.BabyNamesMixin):
 
     def __init__(self, names_in_report: list, excel_filename: str = '',
                  excel_sheetname: str = ''):
+        assert isinstance(names_in_report, (list, tuple)), (
+            'The names_in_report must be a list or a tuple.')
         if excel_filename:
             assert excel_filename[-5:] == '.xlsx', (
                 'The excel_filename must end with ".xlsx"')
@@ -26,8 +30,50 @@ class Script(mixins.BabyNamesMixin):
         self.excel_sheetname = excel_sheetname
 
     def execute_report(self):
-        # Instantiate the table/dataframe for males.
+        pkl_filename = self.get_pkl_filename()
+        already_scraped = pkl_filename in os.listdir(settings.RELATIVE_PATH)
+
+        if not already_scraped:
+            male_df, female_df = self.dfs_from_html()
+        else:
+            male_df, female_df = self.dfs_from_pkl()
+
+        self.save_to_excel([male_df, female_df])
+
+    def get_pkl_filename(self):
+        return os.path.basename(__file__).replace('.py', '_data.pkl')
+
+    def get_pandas_data_path(self) -> str:
+        """
+        Returns:
+            str: The path to the pandas PKL data file.
+        """
+        pkl_filename = self.get_pkl_filename()
+        return os.path.dirname(os.path.abspath(__file__)) + '\\' + pkl_filename
+
+    def save_pkl(self, data: collections.deque):
+        """
+        Saves a Pandas PKL data file.
+
+        Args:
+            data (collections.deque): [description]
+        """
+        path = self.get_pandas_data_path()
+        pd.DataFrame(
+            data,
+            columns=['gender', 'year', 'name', 'rank']
+        ).to_pickle(path)
+
+    def get_empty_dataframes(self):
+        """
+        Creates both male and a female dataframes.
+
+        Returns:
+            [tuple]: A 2-tuple containing DataFrames.
+        """
         header_2 = ['Year'] + self.names_in_report
+
+        # Instantiate the table/dataframe for males.
         male_df = pd.DataFrame(columns=header_2)
         header_1 = ['Male Name Rankings Per Year'] + len(self.names_in_report) * ['']
         male_df.columns = pd.MultiIndex.from_tuples(zip(header_1, header_2))
@@ -37,6 +83,19 @@ class Script(mixins.BabyNamesMixin):
         header_1 = ['Female Name Rankings Per Year'] + len(self.names_in_report) * ['']
         female_df.columns = pd.MultiIndex.from_tuples(zip(header_1, header_2))
 
+        return male_df, female_df
+
+    def dfs_from_html(self):
+        """
+        Scrapes the HTML files found in this file's directory to
+        generate 2 DataFrames (one for males and one for females).
+
+        Returns:
+            [tuple]: A 2-tuple containing non-empty DataFrames.
+        """
+        male_df, female_df = self.get_empty_dataframes()
+        pandas_data = collections.deque()
+        names_in_report = self.names_in_report
         filenames, available_years = self.get_filename_info()
 
         # Gather the data from the files.
@@ -44,7 +103,6 @@ class Script(mixins.BabyNamesMixin):
             html_file = open(f'{settings.RELATIVE_PATH}/{filename}', 'r')
             contents = html_file.read()
             soup = BeautifulSoup(contents, 'html.parser')
-
             year = available_years[index]
             self.validate_year(year, soup)
             table = self.get_table(soup)
@@ -55,8 +113,9 @@ class Script(mixins.BabyNamesMixin):
 
             # The dictionary element's key will be the name.
             # The dictionary element's value will be the rank.
-            male_names = {}
-            female_names = {}
+            male_names_dict = {}
+            female_names_dict = {}
+
             for row in rows:
                 # For most of the HTML files, the table rows are missing the
                 # closing tr tags, so I am calling "next" until I get the
@@ -65,22 +124,89 @@ class Script(mixins.BabyNamesMixin):
                 rank_num = int(str(rank_el))
                 tag = rank_el.next
                 male_name = tag.text.strip()
-                male_names[male_name] = rank_num
+                male_names_dict[male_name] = rank_num
                 female_name = tag.next_sibling.text.strip()
-                female_names[female_name] = rank_num
+                female_names_dict[female_name] = rank_num
+
+                pandas_data.extend(
+                    [
+                        ['m', year, male_name, rank_num],
+                        ['f', year, female_name, rank_num],
+                    ]
+                )
 
             # Append a new row to the male's table.
             male_df.loc[len(male_df.index)] = \
-                self.add_data_to_row(male_names, [year])
+                self.get_all_row_data(male_names_dict, [year])
 
             # Append a new row to the female's table.
             female_df.loc[len(female_df.index)] = \
-                self.add_data_to_row(female_names, [year])
+                self.get_all_row_data(female_names_dict, [year])
+
             html_file.close()
 
-        self.save_to_excel([male_df, female_df])
+        # Save the data in the current directory, so you want have to do run
+        # scrape the html again.
+        self.save_pkl(pandas_data)
+        return male_df, female_df
 
-    def add_data_to_row(self, names: dict, new_row_data: list = []) -> list:
+    def dfs_from_pkl(self):
+        """
+        Uses the PKL file (static data) found in this file's directory to
+        generate 2 DataFrames (one for males and one for females).
+
+        Much faster than the dfs_from_html method because it is not scraping
+        data from HTML. Also faster because it is querying the PKL data file.
+
+        Returns:
+            [tuple]: A 2-tuple containing non-empty DataFrames.
+        """
+        male_df, female_df = self.get_empty_dataframes()
+        path = self.get_pandas_data_path()
+
+        # Filter and fetch the data from the pkl file.
+        df_filter = f'name in {str(list(self.names_in_report))}'
+        # "df" is a very short data set. It is only:
+        # len(self.names_in_report) * available_years * 2.
+        # In this example: 3 * 10 * 2 = 60
+        df = pd.read_pickle(path).query(df_filter)
+        nested_data = {
+            'm': {},
+            'f': {}
+        }
+
+        # Transform the data to a structure similar to what was in the
+        # dfs_from_html method.
+        for i in df.itertuples():
+            try:
+                # Accessing the year can raise a KeyError.
+                nested_data[i.gender][i.year][i.name] = i.rank
+            except KeyError:
+                nested_data[i.gender][i.year] = {i.name: i.rank}
+
+        for gender, value_dict in nested_data.items():
+            if gender == 'm':
+                for year, value_dict in value_dict.items():
+                    male_df.loc[len(male_df.index)] = \
+                        self.get_all_row_data(value_dict, [year])
+            else:
+                for year, value_dict in value_dict.items():
+                    female_df.loc[len(female_df.index)] = \
+                        self.get_all_row_data(value_dict, [year])
+
+        return male_df, female_df
+
+    def get_all_row_data(self, names: dict, new_row_data: list = []) -> list:
+        """
+        Returns 1 row's worth of data that will be appended the end of a table.
+
+        Args:
+            names (dict): A dictionary of names as keys and ranks as values.
+            new_row_data (list, optional): D. Defaults to [].
+
+        Returns:
+            list: 1 row of data
+        """
         for name in self.names_in_report:
             try:
                 rank = names[name]
@@ -89,7 +215,7 @@ class Script(mixins.BabyNamesMixin):
             new_row_data.append(rank)
         return new_row_data
 
-    def save_to_excel(self, dataframes):
+    def save_to_excel(self, dataframes: list):
         output_path = self.get_output_path(__file__)
         writer = pd.ExcelWriter(output_path, engine='xlsxwriter')
         row = 0
