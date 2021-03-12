@@ -1,19 +1,21 @@
 import collections
-import mixins
 import functools
 import os
 import timeit
+
 import pandas as pd
+from bs4 import BeautifulSoup
+
+import mixins
 import settings
 
+NAMES_IN_REPORT = ['Ryan', 'Ben', 'Eugene']
+EXCEL_SHEETNAME = 'Great Report'
 
-from bs4 import BeautifulSoup
 
 def timer(func):
     """Print the runtime of the decorated function."""
 
-NAMES_IN_REPORT = ["Ryan", "Ben", "Eugene"]
-EXCEL_SHEETNAME = 'Great Report'
     @functools.wraps(func)
     def wrapper_timer(*args, **kwargs):
         start_time = timeit.default_timer()
@@ -81,12 +83,12 @@ class Script(mixins.BabyNamesMixin):
         pkl_filename = self.get_pkl_filename()
         return os.path.dirname(os.path.abspath(__file__)) + '\\' + pkl_filename
 
-    def save_pkl(self, data: collections.deque):
+    def save_pkl(self, data):
         """
         Saves a Pandas PKL data file.
 
         Args:
-            data (collections.deque): [description]
+            data (Iterable): An iterable in a structure that Pandas understands.
         """
         path = self.get_pandas_data_path()
         pd.DataFrame(
@@ -96,10 +98,10 @@ class Script(mixins.BabyNamesMixin):
 
     def get_empty_dataframes(self):
         """
-        Creates both male and a female dataframes.
+        Creates male and a female empty dataframes.
 
         Returns:
-            [tuple]: A 2-tuple containing DataFrames.
+            [tuple]: A 2-tuple of empty DataFrames.
         """
         header_2 = ['Year'] + self.names_in_report
 
@@ -117,15 +119,14 @@ class Script(mixins.BabyNamesMixin):
 
     def dfs_from_html(self):
         """
-        Scrapes the HTML files found in this file's directory to
-        generate 2 DataFrames (one for males and one for females).
+        Scrapes the HTML files found in this file's directory to generate 2
+        DataFrames (one for males and one for females).
 
         Returns:
-            [tuple]: A 2-tuple containing non-empty DataFrames.
+            [tuple]: A 2-tuple of non-empty DataFrames.
         """
         male_df, female_df = self.get_empty_dataframes()
         pandas_data = collections.deque()
-        names_in_report = self.names_in_report
         filenames, available_years = self.get_filename_info()
 
         # Gather the data from the files.
