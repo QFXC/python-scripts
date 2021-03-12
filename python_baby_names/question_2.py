@@ -1,15 +1,35 @@
 import collections
 import mixins
+import functools
 import os
+import timeit
 import pandas as pd
 import settings
 
 
 from bs4 import BeautifulSoup
 
+def timer(func):
+    """Print the runtime of the decorated function."""
 
 NAMES_IN_REPORT = ["Ryan", "Ben", "Eugene"]
 EXCEL_SHEETNAME = 'Great Report'
+    @functools.wraps(func)
+    def wrapper_timer(*args, **kwargs):
+        start_time = timeit.default_timer()
+        value = func(*args, **kwargs)
+        end_time = timeit.default_timer()
+        elapsed_time = end_time - start_time
+        console_msg = f'Took {round(elapsed_time, 2)} seconds.'
+        script_obj = args[0]
+        if script_obj.generate_excel:
+            console_msg += ' (Including the time it took to generate the Excel file.)'
+        else:
+            console_msg += ' (NOT including the time it took to generate the Excel file.)'
+        print(console_msg)
+        return value
+
+    return wrapper_timer
 
 
 class Script(mixins.BabyNamesMixin):
@@ -18,8 +38,13 @@ class Script(mixins.BabyNamesMixin):
     baby names.
     """
 
-    def __init__(self, names_in_report: list, excel_filename: str = '',
-                 excel_sheetname: str = ''):
+    def __init__(
+        self,
+        names_in_report: list,
+        excel_filename: str = '',
+        excel_sheetname: str = '',
+        generate_excel: bool = True,
+    ):
         assert isinstance(names_in_report, (list, tuple)), (
             'The names_in_report must be a list or a tuple.')
         if excel_filename:
@@ -28,8 +53,12 @@ class Script(mixins.BabyNamesMixin):
         self.excel_filename = excel_filename
         self.names_in_report = names_in_report
         self.excel_sheetname = excel_sheetname
+        self.generate_excel = generate_excel
 
+    @timer
     def execute_report(self):
+        print()
+
         pkl_filename = self.get_pkl_filename()
         already_scraped = pkl_filename in os.listdir(settings.RELATIVE_PATH)
 
@@ -38,7 +67,8 @@ class Script(mixins.BabyNamesMixin):
         else:
             male_df, female_df = self.dfs_from_pkl()
 
-        self.save_to_excel([male_df, female_df])
+        if self.generate_excel:
+            self.save_to_excel([male_df, female_df])
 
     def get_pkl_filename(self):
         return os.path.basename(__file__).replace('.py', '_data.pkl')
@@ -231,7 +261,9 @@ class Script(mixins.BabyNamesMixin):
         print(f'Created: {output_path}')
 
 
-Script(
+script = Script(
     NAMES_IN_REPORT,
     excel_sheetname=EXCEL_SHEETNAME,
-).execute_report()
+    generate_excel=True
+)
+script.execute_report()
