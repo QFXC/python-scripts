@@ -91,28 +91,30 @@ class BabyNamesMixin:
         assert year_in_title == year, (
             f'Year "{year_in_title}" !== "{year}"')
 
-    def get_table(self, soup):
+    def get_table(self, soup, filename: str):
         """
         Finds the correct table within BeautifulSoup object and validates it
         before it is returned.
 
         Args:
             soup (BeautifulSoup): The soup of the entire page.
+            filename (str): The name of the file.
 
         Returns:
             [BeautifulSoup]: The HTML table element within the soup.
         """
         # In all cases, the data we need is in the 3rd table.
         table = soup.find_all('table')[2]
-        self.validate_table_columns(table)
+        self.validate_table_columns(table, filename)
         return table
 
-    def validate_table_columns(self, table):
+    def validate_table_columns(self, table, filename: str):
         """
-        Validate that the table's columns are in the expected order.
+        Validates that the table's columns are in the expected order.
 
         Args:
             table (BeautifulSoup): The table object found in the HTML file.
+            filename (str): The name of the file.
         """
         # Make sure the order of the columns are what is expected.
         table_header = table.select_one('tr')

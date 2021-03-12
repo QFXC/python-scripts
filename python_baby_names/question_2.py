@@ -136,7 +136,7 @@ class Script(mixins.BabyNamesMixin):
             soup = BeautifulSoup(contents, 'html.parser')
             year = available_years[index]
             self.validate_year(year, soup)
-            table = self.get_table(soup)
+            table = self.get_table(soup, filename)
 
             # Find all the rows in the table.
             # The first row is the header, so skip it.
