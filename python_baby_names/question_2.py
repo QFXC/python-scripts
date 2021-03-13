@@ -45,7 +45,7 @@ class Script(mixins.BabyNamesMixin):
         names_in_report: list,
         excel_filename: str = '',
         excel_sheetname: str = '',
-        generate_excel: bool = True,
+        generate_excel: bool = True
     ):
         assert isinstance(names_in_report, (list, tuple)), (
             'The names_in_report must be a list or a tuple.')
@@ -65,8 +65,10 @@ class Script(mixins.BabyNamesMixin):
         already_scraped = pkl_filename in os.listdir(settings.RELATIVE_PATH)
 
         if not already_scraped:
+            print('Scraping HTML files for data.')
             male_df, female_df = self.dfs_from_html()
         else:
+            print('Using the stored data in the Pandas PKL file.')
             male_df, female_df = self.dfs_from_pkl()
 
         if self.generate_excel:
@@ -77,8 +79,7 @@ class Script(mixins.BabyNamesMixin):
 
     def get_pandas_data_path(self) -> str:
         """
-        Returns:
-            str: The path to the pandas PKL data file.
+        Returns the path to the Pandas PKL data file.
         """
         pkl_filename = self.get_pkl_filename()
         return os.path.dirname(os.path.abspath(__file__)) + '\\' + pkl_filename
@@ -97,12 +98,6 @@ class Script(mixins.BabyNamesMixin):
         ).to_pickle(path)
 
     def get_empty_dataframes(self):
-        """
-        Creates male and a female empty dataframes.
-
-        Returns:
-            [tuple]: A 2-tuple of empty DataFrames.
-        """
         header_2 = ['Year'] + self.names_in_report
 
         # Instantiate the table/dataframe for males.
@@ -123,7 +118,7 @@ class Script(mixins.BabyNamesMixin):
         DataFrames (one for males and one for females).
 
         Returns:
-            [tuple]: A 2-tuple of non-empty DataFrames.
+            tuple: A 2-tuple of non-empty DataFrames.
         """
         male_df, female_df = self.get_empty_dataframes()
         pandas_data = collections.deque()
@@ -176,8 +171,8 @@ class Script(mixins.BabyNamesMixin):
 
             html_file.close()
 
-        # Save the data in the current directory, so you want have to do run
-        # scrape the html again.
+        # Save the data in the current directory, so you won't have to scrape
+        # the HTML again.
         self.save_pkl(pandas_data)
         return male_df, female_df
 
@@ -190,12 +185,12 @@ class Script(mixins.BabyNamesMixin):
         data from HTML. Also faster because it is querying the PKL data file.
 
         Returns:
-            [tuple]: A 2-tuple containing non-empty DataFrames.
+            tuple: A 2-tuple containing non-empty DataFrames.
         """
         male_df, female_df = self.get_empty_dataframes()
         path = self.get_pandas_data_path()
 
-        # Filter and fetch the data from the pkl file.
+        # Filter and fetch the data from the PKL file.
         df_filter = f'name in {str(list(self.names_in_report))}'
         # "df" is a very short data set. It is only:
         # len(self.names_in_report) * available_years * 2.
@@ -206,7 +201,7 @@ class Script(mixins.BabyNamesMixin):
             'f': {}
         }
 
-        # Transform the data to a structure similar to what was in the
+        # Transform the queried data to a structure similar to what is in the
         # dfs_from_html method.
         for i in df.itertuples():
             try:
@@ -218,10 +213,12 @@ class Script(mixins.BabyNamesMixin):
         for gender, value_dict in nested_data.items():
             if gender == 'm':
                 for year, value_dict in value_dict.items():
+                    # Append a new row to the male's table.
                     male_df.loc[len(male_df.index)] = \
                         self.get_all_row_data(value_dict, [year])
             else:
                 for year, value_dict in value_dict.items():
+                    # Append a new row to the female's table.
                     female_df.loc[len(female_df.index)] = \
                         self.get_all_row_data(value_dict, [year])
 
@@ -229,14 +226,7 @@ class Script(mixins.BabyNamesMixin):
 
     def get_all_row_data(self, names: dict, new_row_data: list = []) -> list:
         """
-        Returns 1 row's worth of data that will be appended the end of a table.
-
-        Args:
-            names (dict): A dictionary of names as keys and ranks as values.
-            new_row_data (list, optional): D. Defaults to [].
-
-        Returns:
-            list: 1 row of data
+        Creates and returns two empty dataframes.
         """
         for name in self.names_in_report:
             try:
