@@ -17,21 +17,21 @@ def timer(func):
     """Print the runtime of the decorated function."""
 
     @functools.wraps(func)
-    def wrapper_timer(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         start_time = timeit.default_timer()
         value = func(*args, **kwargs)
         end_time = timeit.default_timer()
         elapsed_time = end_time - start_time
-        console_msg = f'Took {round(elapsed_time, 2)} seconds.'
+        msg = f'Took {round(elapsed_time, 2)} seconds.'
         script_obj = args[0]
         if script_obj.generate_excel:
-            console_msg += ' (Including the time it took to generate the Excel file.)'
+            msg += ' (Including the time it took to generate the Excel file.)'
         else:
-            console_msg += ' (NOT including the time it took to generate the Excel file.)'
-        print(console_msg)
+            msg += ' (NOT including the time it took to generate the Excel file.)'
+        print(msg)
         return value
 
-    return wrapper_timer
+    return wrapper
 
 
 class Script(mixins.BabyNamesMixin):
@@ -47,8 +47,6 @@ class Script(mixins.BabyNamesMixin):
         excel_sheetname: str = '',
         generate_excel: bool = True
     ):
-        assert isinstance(names_in_report, (list, tuple)), (
-            'The names_in_report must be a list or a tuple.')
         if excel_filename:
             assert excel_filename[-5:] == '.xlsx', (
                 'The excel_filename must end with ".xlsx"')
@@ -77,7 +75,7 @@ class Script(mixins.BabyNamesMixin):
     def get_pkl_filename(self):
         return os.path.basename(__file__).replace('.py', '_data.pkl')
 
-    def get_pandas_data_path(self) -> str:
+    def get_pkl_path(self) -> str:
         """
         Returns the path to the Pandas PKL data file.
         """
@@ -91,7 +89,7 @@ class Script(mixins.BabyNamesMixin):
         Args:
             data (Iterable): An iterable in a structure that Pandas understands.
         """
-        path = self.get_pandas_data_path()
+        path = self.get_pkl_path()
         pd.DataFrame(
             data,
             columns=['gender', 'year', 'name', 'rank']
@@ -188,14 +186,14 @@ class Script(mixins.BabyNamesMixin):
             tuple: A 2-tuple containing non-empty DataFrames.
         """
         male_df, female_df = self.get_empty_dataframes()
-        path = self.get_pandas_data_path()
+        pkl_path = self.get_pkl_path()
 
         # Filter and fetch the data from the PKL file.
         df_filter = f'name in {str(list(self.names_in_report))}'
         # "df" is a very short data set. It is only:
         # len(self.names_in_report) * available_years * 2.
         # In this example: 3 * 10 * 2 = 60
-        df = pd.read_pickle(path).query(df_filter)
+        df = pd.read_pickle(pkl_path).query(df_filter)
         nested_data = {
             'm': {},
             'f': {}

@@ -78,10 +78,9 @@ class BabyNamesMixin:
             title_el = soup.select_one(tag)
             try:
                 title_text = title_el.text
-            except AttributeError:
-                continue
-            else:
                 break
+            except AttributeError:
+                pass
 
         # Make sure the year in the filename is the same as the year in the
         # title.
