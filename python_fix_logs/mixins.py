@@ -1,4 +1,5 @@
 import os
+
 import settings
 
 
@@ -16,7 +17,7 @@ class FixLogMixin:
                 The __file__ value that's available in every Python file.
 
         Returns:
-            [str]: The path of the output.
+            str: The path of the output.
         """
         excel_filename = (
             self.excel_filename or

@@ -2,7 +2,7 @@
 FILENAME_PREFIX = 'baby'
 FILE_TYPE = '.html'
 
-# EXPECTED_COLUMN_ORDER the expected column names of each HTML file.
+# EXPECTED_COLUMN_ORDER represents the expected column names of each HTML file.
 # Must be lowercase.
 EXPECTED_COLUMN_ORDER = ['rank', 'male name', 'female name']
 

@@ -15,8 +15,8 @@ SYMBOL_TAG = '55=ES'
 class ExecutionReportAnalyzer(mixins.FixLogMixin):
     """
     This script processes the FIX log files and reports a summary of the
-    quantity filled on a specific Symbol. It uses execution reports
-    (Tag 35=8) and examines the CumQty field (Tag 14).
+    quantity filled on a specific Symbol. It uses execution report (Tag 35=8)
+    and examines the CumQty field (Tag 14).
     """
 
     def __init__(self, symbol_tag: str, excel_filename: str = ''):
@@ -29,20 +29,24 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
 
     @timer
     def execute_report(self):
+        print()
+
         filenames = self.get_filenames()
         symbol_tag = self.symbol_tag
         execution_report_tag = self.execution_report_tag
 
-        # The dictionary element's key will be the Order Id.
-        # The dictionary element's value will be a list of cumulative quantities.
+        # Store data into a dict where the Order Id is the key and the a list
+        # of cumulative quantities is the value.
         report = {}
 
         for filename in filenames:
             fix_file = open(f'{settings.RELATIVE_PATH}/{filename}', 'r')
+
             for message in fix_file.readlines():
                 # Search for "35=8" first because it's always near the
                 # beginning of the message.
                 # Proof: https://www.onixs.biz/fix-dictionary/4.2/tagnum_35.html
+
                 end_index =  min([settings.START_INDEX * 2, len(message) - 1])
                 message_beginning = message[settings.START_INDEX: end_index]
                 if execution_report_tag in message_beginning:
@@ -93,10 +97,11 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
                 #   TypeError: '>' not supported between instances of 'NoneType' and 'int'
                 raise TypeError(
                     str(e) +
-                    '\nThis means that cumulative quantity was not in one of the messages.')
+                    '\nThis means that Tag 14 was not in one of the messages.')
 
-        # Sort the dictionary by key/Order Id, because it's not guaranteed to be in order.
-        # (report get's reassigned as list of 2-tuples)
+        # Sort the dictionary by key/Order Id, because it's not guaranteed to
+        # be in order.
+        # (report get's reassigned as a list of 2-tuples)
         report = sorted(report.items())
         return cumulative_qty_sum, report
 

@@ -34,6 +34,7 @@ class Script(mixins.BabyNamesMixin):
 
     @timer
     def execute_report(self):
+        print()
 
         male_df, female_df = self.get_empty_dataframes()
         filenames, available_years = self.get_filename_info()
@@ -42,15 +43,14 @@ class Script(mixins.BabyNamesMixin):
         for index, filename in enumerate(filenames):
             html_file = open(f'{settings.RELATIVE_PATH}/{filename}', 'r')
             contents = html_file.read()
-
             year = available_years[index]
             soup = BeautifulSoup(contents, 'lxml')
             self.validate_year(year, soup)
             table = self.get_table(soup, filename)
             rows = table.find_all('tr', attrs={'align': 'right'})
 
-            # The dictionary element's key will be the name.
-            # The dictionary element's value will be the rank.
+            # Store data into a dict where the name is the key and the name's
+            # rank as the value.
             male_names = {}
             female_names = {}
             for row in rows:

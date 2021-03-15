@@ -54,24 +54,27 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
         self.execution_report_tag = '35=8'
         self.order_status_tag = '39'
 
-        # Initialize the structure of the dictionary.
-        # The dictionary element's key will be the Tag.
-        # The dictionary element's value will be count of orders.
+        # Store data into a dict where the the Tag is the key and the count of
+        # orders is the value.
         report = {}
         for value in categories_needed:
             if isinstance(value, Enum):
                 value = value.value
             report[f'{self.order_status_tag}={value}'] = 0
+
         self.report = report
 
     @timer
     def execute_report(self):
+        print()
+
         filenames = self.get_filenames()
         order_status_tag = self.order_status_tag + '='
         execution_report_tag = self.execution_report_tag
 
         for filename in filenames:
             fix_file = open(f'{settings.RELATIVE_PATH}/{filename}', 'r')
+
             for message in fix_file.readlines():
                 # Only tag "35-8" has order statuses (39=2, 39=1, and 39=4).
                 # Search for "35=8" first because it's always near the
@@ -92,6 +95,7 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
                             index -= 1
                         else:
                             index = -1
+                            # If there's a KeyError, then it's not needed.
                             try:
                                 self.report[tag] += 1
                             except KeyError:
@@ -101,6 +105,8 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
         self.save_to_excel()
 
     def save_to_excel(self):
+        print(self.report)
+
         # Create a workbook and add a worksheet.
         output_path = self.get_output_path(__file__)
         workbook = xlsxwriter.Workbook(output_path)

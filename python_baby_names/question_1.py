@@ -15,8 +15,8 @@ NAME_QUANTITY_NEEDED = 5
 
 class Script(mixins.BabyNamesMixin):
     """
-    This script scrapes all HTML files in the directory and reports
-    the top names for each year for both males and females.
+    This script scrapes all HTML files in the directory and report the top
+    names for each year for both males and females.
     """
 
     def __init__(self, name_quantity_needed: int, excel_filename: str = ''):
@@ -28,20 +28,27 @@ class Script(mixins.BabyNamesMixin):
 
     @timer
     def execute_report(self):
+        print()
+
         male_name_key = 'male_names'
         female_name_key = 'female_names'
+
+        # Store data into a nested dict.
+        # Example:
+        # {
+        #   'male_names': {'1990': ['Michael', 'Christopher', 'Matthew', 'Joshua', 'Daniel']},
+        #   'female_names': {'1990': ['Jessica', 'Ashley', 'Brittany', 'Amanda', 'Samantha']}
+        # }
         report = {
             male_name_key: {},
             female_name_key: {},
         }
-
         filenames, available_years = self.get_filename_info()
 
         # Gather the data from the files.
         for index, filename in enumerate(filenames):
             html_file = open(f'{settings.RELATIVE_PATH}/{filename}', 'r')
             contents = html_file.read()
-
             soup = BeautifulSoup(contents, 'lxml')
             year = available_years[index]
             self.validate_year(year, soup)
@@ -81,6 +88,8 @@ class Script(mixins.BabyNamesMixin):
         col = 0
 
         # Iterate over the data and write it out row by row.
+
+        # Write the header row.
         worksheet.write(row, col, 'Year')
         rank_list = [i + 1 for i in range(self.name_quantity_needed)]
         for rank in rank_list:
@@ -95,7 +104,7 @@ class Script(mixins.BabyNamesMixin):
             worksheet.write(row, first_col, mf)
             row += 1
 
-            # Write a new row that contains the year and names.
+            # Write a row for each name.
             for year, name_list in year_list.items():
                 worksheet.write(row, first_col, year)
                 for i, name in enumerate(name_list):
