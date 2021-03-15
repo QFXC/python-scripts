@@ -1,6 +1,6 @@
-# scripts
+# python-scripts
 
-These scripts have dependencies as seen in the Pipfile (Beautiful Soup, Pandas, and xlsxwriter)
+These scripts have dependencies as seen in the Pipfile (Beautiful Soup, lxml, Pandas, and xlsxwriter)
 
 
 ### Install the dependencies in a pipenv virtual environment:
@@ -24,8 +24,7 @@ These scripts have dependencies as seen in the Pipfile (Beautiful Soup, Pandas, 
 # Option 2
 ### Run these ___alternate___ Python scripts to generate Excel files in their respective directories:
 #### These use Regular Expressions to generate the same files as Option 1.
-1. Make sure you have all the latest dependencies
-    ```pipenv sync```
+1. Make sure you have all the latest dependencies  ```pipenv sync```
 
 * ```python ./python_baby_names/question_1_v2.py```
 * ```python ./python_baby_names/question_2_v2.py```
