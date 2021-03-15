@@ -2,8 +2,12 @@ import mixins
 import os
 import re
 import settings
+import sys
+
 import xlsxwriter
 
+sys.path.insert(0, '')
+from utils import timer
 
 SYMBOL_TAG = '55=ES'
 
@@ -23,6 +27,7 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
         self.symbol_tag = symbol_tag
         self.execution_report_tag = '35=8'
 
+    @timer
     def execute_report(self):
         filenames = self.get_filenames()
 

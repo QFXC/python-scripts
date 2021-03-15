@@ -2,9 +2,12 @@ import mixins
 import os
 import pandas as pd
 import settings
+import sys
 
 from bs4 import BeautifulSoup
 
+sys.path.insert(0, '')
+from utils import timer
 
 NAMES_IN_REPORT = ["Ryan", "Ben", "Eugene"]
 EXCEL_SHEETNAME = 'Great Report'
@@ -25,6 +28,7 @@ class Script(mixins.BabyNamesMixin):
         self.names_in_report = names_in_report
         self.excel_sheetname = excel_sheetname
 
+    @timer
     def execute_report(self):
         # Instantiate the table/dataframe for males.
         header_2 = ['Year'] + self.names_in_report

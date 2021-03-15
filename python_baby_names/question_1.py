@@ -2,9 +2,12 @@ import mixins
 import os
 import settings
 import xlsxwriter
+import sys
 
 from bs4 import BeautifulSoup
 
+sys.path.insert(0, '')
+from utils import timer
 
 # NAME_QUANTITY_NEEDED represents the first X names
 NAME_QUANTITY_NEEDED = 5
@@ -26,6 +29,7 @@ class Script(mixins.BabyNamesMixin):
         self.excel_filename = excel_filename
         self.name_quantity_needed = name_quantity_needed
 
+    @timer
     def execute_report(self):
         report = {
             self.male_name_key: {},

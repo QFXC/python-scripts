@@ -2,9 +2,12 @@ import mixins
 import os
 import re
 import settings
+import sys
 import xlsxwriter
 
 from enum import Enum
+sys.path.insert(0, '')
+from utils import timer
 
 
 class OrdStatus(Enum):
@@ -53,6 +56,7 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
             report[f'{self.order_status_tag}={value}'] = 0
         self.report = report
 
+    @timer
     def execute_report(self):
         filenames = self.get_filenames()
         order_status_tag = self.order_status_tag + '='
