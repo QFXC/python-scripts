@@ -1,10 +1,10 @@
-import mixins
-import os
 import re
-import settings
 import sys
 
 import xlsxwriter
+
+import mixins
+import settings
 
 sys.path.insert(0, '')
 from utils import timer
@@ -30,6 +30,8 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
     @timer
     def execute_report(self):
         filenames = self.get_filenames()
+        symbol_tag = self.symbol_tag
+        execution_report_tag = self.execution_report_tag
 
         # The dictionary element's key will be the Order Id.
         # The dictionary element's value will be a list of cumulative quantities.
@@ -43,7 +45,7 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
                 # Proof: https://www.onixs.biz/fix-dictionary/4.2/tagnum_35.html
                 end_index =  min([settings.START_INDEX * 2, len(message) - 1])
                 message_beginning = message[settings.START_INDEX: end_index]
-                if self.execution_report_tag in message_beginning:
+                if execution_report_tag in message_beginning:
                     tag_list = re.split(settings.DELIMITER, message)
 
                     # Only report messages with self.symbol_tag "55=ES".
@@ -51,7 +53,7 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
                     # always closer to the end of the message.
                     index = len(tag_list) - 1
                     while index > -1:
-                        if tag_list[index] != self.symbol_tag:
+                        if tag_list[index] != symbol_tag:
                             index -= 1
                         else:
                             index = -1
@@ -64,16 +66,16 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
                                     cumulative_qty = int(tag[3:])
                             assert order_id is not None, (
                                 'Tag 11 was not in the message.')
-                            try:
-                                report[order_id].append(cumulative_qty)
-                            except KeyError:
-                                report[order_id] = [cumulative_qty]
+
+                            report.setdefault(
+                                order_id, [cumulative_qty]).append(cumulative_qty)
 
             fix_file.close()
 
-        self.save_to_excel(*self.finish_report(report))
+        result = self.finish_report(report)
+        self.save_to_excel(*result)
 
-    def finish_report(self, report):
+    def finish_report(self, report) -> tuple:
         """
         Change the value for each order from a list of Cumulative Quantities
         to the max Cumulative Quantity because an order (uniquely identified
@@ -127,4 +129,5 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
         print(f'Detailed Report Created: {output_path}')
 
 
-ExecutionReportAnalyzer(SYMBOL_TAG).execute_report()
+script = ExecutionReportAnalyzer(SYMBOL_TAG)
+script.execute_report()

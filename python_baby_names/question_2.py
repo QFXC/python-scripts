@@ -1,15 +1,19 @@
-import mixins
-import os
-import pandas as pd
-import settings
 import sys
 
+import pandas as pd
 from bs4 import BeautifulSoup
+
+import mixins
+import settings
 
 sys.path.insert(0, '')
 from utils import timer
 
-NAMES_IN_REPORT = ["Ryan", "Ben", "Eugene"]
+NAMES_IN_REPORT = (
+    'Ryan',
+    'Ben',
+    'Eugene',
+)
 EXCEL_SHEETNAME = 'Great Report'
 
 
@@ -19,7 +23,7 @@ class Script(mixins.BabyNamesMixin):
     baby names.
     """
 
-    def __init__(self, names_in_report: list, excel_filename: str = '',
+    def __init__(self, names_in_report: tuple, excel_filename: str = '',
                  excel_sheetname: str = ''):
         if excel_filename:
             assert excel_filename[-5:] == '.xlsx', (
@@ -30,17 +34,8 @@ class Script(mixins.BabyNamesMixin):
 
     @timer
     def execute_report(self):
-        # Instantiate the table/dataframe for males.
-        header_2 = ['Year'] + self.names_in_report
-        male_df = pd.DataFrame(columns=header_2)
-        header_1 = ['Male Name Rankings Per Year'] + len(self.names_in_report) * ['']
-        male_df.columns = pd.MultiIndex.from_tuples(zip(header_1, header_2))
 
-        # Instantiate the table/dataframe for females.
-        female_df = pd.DataFrame(columns=header_2)
-        header_1 = ['Female Name Rankings Per Year'] + len(self.names_in_report) * ['']
-        female_df.columns = pd.MultiIndex.from_tuples(zip(header_1, header_2))
-
+        male_df, female_df = self.get_empty_dataframes()
         filenames, available_years = self.get_filename_info()
 
         # Gather the data from the files.
@@ -51,11 +46,8 @@ class Script(mixins.BabyNamesMixin):
             year = available_years[index]
             soup = BeautifulSoup(contents, 'lxml')
             self.validate_year(year, soup)
-            table = self.get_table(soup)
-
-            # Find all the rows in the table.
-            # The first row is the header, so skip it.
-            rows = table.find_all('tr', attrs={'align': 'right'})[1:]
+            table = self.get_table(soup, filename)
+            rows = table.find_all('tr', attrs={'align': 'right'})
 
             # The dictionary element's key will be the name.
             # The dictionary element's value will be the rank.
@@ -75,16 +67,32 @@ class Script(mixins.BabyNamesMixin):
 
             # Append a new row to the male's table.
             male_df.loc[len(male_df.index)] = \
-                self.add_data_to_row(male_names, [year])
+                self.get_all_row_data(male_names, [year])
 
             # Append a new row to the female's table.
             female_df.loc[len(female_df.index)] = \
-                self.add_data_to_row(female_names, [year])
+                self.get_all_row_data(female_names, [year])
+
             html_file.close()
 
-        self.save_to_excel([male_df, female_df])
+        self.save_to_excel(male_df, female_df)
 
-    def add_data_to_row(self, names: dict, new_row_data: list = []) -> list:
+    def get_empty_dataframes(self) -> tuple:
+        header_2 = ['Year'] + list(self.names_in_report)
+
+        # Instantiate the table/dataframe for males.
+        male_df = pd.DataFrame(columns=header_2)
+        header_1 = ['Male Name Rankings Per Year'] + len(self.names_in_report) * ['']
+        male_df.columns = pd.MultiIndex.from_tuples(zip(header_1, header_2))
+
+        # Instantiate the table/dataframe for females.
+        female_df = pd.DataFrame(columns=header_2)
+        header_1 = ['Female Name Rankings Per Year'] + len(self.names_in_report) * ['']
+        female_df.columns = pd.MultiIndex.from_tuples(zip(header_1, header_2))
+
+        return male_df, female_df
+
+    def get_all_row_data(self, names: dict, new_row_data: list = []) -> list:
         for name in self.names_in_report:
             try:
                 rank = names[name]
@@ -93,7 +101,7 @@ class Script(mixins.BabyNamesMixin):
             new_row_data.append(rank)
         return new_row_data
 
-    def save_to_excel(self, dataframes):
+    def save_to_excel(self, *dataframes):
         output_path = self.get_output_path(__file__)
         writer = pd.ExcelWriter(output_path, engine='xlsxwriter')
         row = 0
@@ -109,7 +117,5 @@ class Script(mixins.BabyNamesMixin):
         print(f'Created: {output_path}')
 
 
-Script(
-    NAMES_IN_REPORT,
-    excel_sheetname=EXCEL_SHEETNAME,
-).execute_report()
+script = Script(NAMES_IN_REPORT, excel_sheetname=EXCEL_SHEETNAME)
+script.execute_report()

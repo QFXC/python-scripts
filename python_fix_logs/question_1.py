@@ -1,16 +1,17 @@
-import mixins
-import os
 import re
-import settings
 import sys
+from enum import Enum
+
 import xlsxwriter
 
-from enum import Enum
+import mixins
+import settings
+
 sys.path.insert(0, '')
 from utils import timer
 
 
-class OrdStatus(Enum):
+class OrderStatus(Enum):
     NEW = '0'
     PARTIALLY_FILLED = '1'
     FILLED = '2'
@@ -28,6 +29,13 @@ class OrdStatus(Enum):
     PENDING_REPLACE = 'E'
 
 
+CATEGORIES_NEEDED = (
+    OrderStatus.FILLED,
+    OrderStatus.PARTIALLY_FILLED,
+    OrderStatus.CANCELLED,
+)
+
+
 class OrderStatusAnalyzer(mixins.FixLogMixin):
     """
     This script processes the FIX log files in the directory and reports a
@@ -35,7 +43,7 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
     the categories that it's instantiated with.
     """
 
-    def __init__(self, categories_needed: list, excel_filename: str = ''):
+    def __init__(self, categories_needed: tuple, excel_filename: str = ''):
         if excel_filename:
             assert excel_filename[-5:] == '.xlsx', (
                 'The excel_filename must end with ".xlsx"')
@@ -60,6 +68,7 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
     def execute_report(self):
         filenames = self.get_filenames()
         order_status_tag = self.order_status_tag + '='
+        execution_report_tag = self.execution_report_tag
 
         for filename in filenames:
             fix_file = open(f'{settings.RELATIVE_PATH}/{filename}', 'r')
@@ -70,7 +79,7 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
                 # Proof: https://www.onixs.biz/fix-dictionary/4.2/tagnum_35.html
                 end_index =  min([settings.START_INDEX * 2, len(message) - 1])
                 message_beginning = message[settings.START_INDEX: end_index]
-                if self.execution_report_tag in message_beginning:
+                if execution_report_tag in message_beginning:
                     tag_list = re.split(settings.DELIMITER, message)
 
                     # Only count messages that contain the order_status_tag (39).
@@ -113,8 +122,5 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
         print(f'Created: {output_path}')
 
 
-OrderStatusAnalyzer([
-    OrdStatus.FILLED,
-    OrdStatus.PARTIALLY_FILLED,
-    OrdStatus.CANCELLED,
-]).execute_report()
+script = OrderStatusAnalyzer(CATEGORIES_NEEDED)
+script.execute_report()

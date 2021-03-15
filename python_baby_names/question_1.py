@@ -1,10 +1,10 @@
-import mixins
-import os
-import settings
-import xlsxwriter
 import sys
 
+import xlsxwriter
 from bs4 import BeautifulSoup
+
+import mixins
+import settings
 
 sys.path.insert(0, '')
 from utils import timer
@@ -19,9 +19,6 @@ class Script(mixins.BabyNamesMixin):
     the top names for each year for both males and females.
     """
 
-    male_name_key = 'male_names'
-    female_name_key = 'female_names'
-
     def __init__(self, name_quantity_needed: int, excel_filename: str = ''):
         if excel_filename:
             assert excel_filename[-5:] == '.xlsx', (
@@ -31,9 +28,11 @@ class Script(mixins.BabyNamesMixin):
 
     @timer
     def execute_report(self):
+        male_name_key = 'male_names'
+        female_name_key = 'female_names'
         report = {
-            self.male_name_key: {},
-            self.female_name_key: {},
+            male_name_key: {},
+            female_name_key: {},
         }
 
         filenames, available_years = self.get_filename_info()
@@ -46,7 +45,7 @@ class Script(mixins.BabyNamesMixin):
             soup = BeautifulSoup(contents, 'lxml')
             year = available_years[index]
             self.validate_year(year, soup)
-            table = self.get_table(soup)
+            table = self.get_table(soup, filename)
 
             # Find all the rows in the table.
             # The first row is the header, so skip it.
@@ -65,8 +64,8 @@ class Script(mixins.BabyNamesMixin):
                 female_name = tag.next_sibling.text.strip()
                 female_names.append(female_name)
 
-            report[self.male_name_key][year] = male_names
-            report[self.female_name_key][year] = female_names
+            report[male_name_key][year] = male_names
+            report[female_name_key][year] = female_names
             html_file.close()
 
         self.save_to_excel(report)
@@ -99,7 +98,6 @@ class Script(mixins.BabyNamesMixin):
             # Write a new row that contains the year and names.
             for year, name_list in year_list.items():
                 worksheet.write(row, first_col, year)
-                col = first_col + 1
                 for i, name in enumerate(name_list):
                     worksheet.write(row, i + 1, name)
                 row += 1
@@ -108,4 +106,5 @@ class Script(mixins.BabyNamesMixin):
         print(f'Created: {output_path}')
 
 
-Script(NAME_QUANTITY_NEEDED).execute_report()
+script = Script(NAME_QUANTITY_NEEDED)
+script.execute_report()

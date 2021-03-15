@@ -1,7 +1,8 @@
 import os
-import settings
 
 from bs4 import Tag
+
+import settings
 
 
 class BabyNamesMixin:
@@ -9,13 +10,13 @@ class BabyNamesMixin:
     header_tags = settings.HEADER_TAGS
     excel_filename = ''
 
-    def get_output_path(self, file_dundar: str) -> str:
+    def get_output_path(self, file_dunder: str) -> str:
         """
         Returns the path of the file (including the filename within the path)
         that will be created.
 
         Args:
-            file_dundar (str):
+            file_dunder (str):
                 The __file__ value that's available in every Python file.
 
         Returns:
@@ -23,10 +24,10 @@ class BabyNamesMixin:
         """
         excel_filename = (
             self.excel_filename or
-            os.path.basename(file_dundar).replace('.py', '_report.xlsx')
+            os.path.basename(file_dunder).replace('.py', '_report.xlsx')
         )
         output_path = (
-            os.path.dirname(os.path.abspath(file_dundar)) + '\\' + excel_filename)
+            os.path.dirname(os.path.abspath(file_dunder)) + '\\' + excel_filename)
         return output_path
 
     def get_filename_info(self) -> tuple:
@@ -76,43 +77,42 @@ class BabyNamesMixin:
             title_el = soup.select_one(tag)
             try:
                 title_text = title_el.text
+                break
             except AttributeError:
                 continue
-            else:
-                break
 
         # Make sure the year in the filename is the same as the year in the
         # title.
         year_in_title = title_text[-4:]
-        assert year_in_title.isdigit(), (
+        assert year_in_title.isdigit() and len(year_in_title) == 4, (
             f'Did not extract a valid year from the HTML. Instead got ({year_in_title}).')
-        # It will be a long time until there more than 4 digits are in a year.
-        assert len(year_in_title) == 4
         assert year_in_title == year, (
             f'Year "{year_in_title}" !== "{year}"')
 
-    def get_table(self, soup):
+    def get_table(self, soup, filename: str):
         """
         Finds the correct table within BeautifulSoup object and validates it
         before it is returned.
 
         Args:
             soup (BeautifulSoup): The soup of the entire page.
+            filename (str): The name of the file.
 
         Returns:
             [BeautifulSoup]: The HTML table element within the soup.
         """
         # In all cases, the data we need is in the 3rd table.
         table = soup.find_all('table')[2]
-        self.validate_table_columns(table)
+        self.validate_table_columns(table, filename)
         return table
 
-    def validate_table_columns(self, table):
+    def validate_table_columns(self, table, filename: str):
         """
         Validate that the table's columns are in the expected order.
 
         Args:
             table (BeautifulSoup): The table object found in the HTML file.
+            filename (str): The name of the file.
         """
         # Make sure the order of the columns are what is expected.
         table_header = table.select_one('tr')
