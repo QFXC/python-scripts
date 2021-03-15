@@ -29,6 +29,9 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
 
     @timer
     def execute_report(self):
+        """
+        Executes the script to create a report in Excel format.
+        """
         print()
 
         filenames = self.get_filenames()

@@ -34,6 +34,9 @@ class Script(mixins.BabyNamesMixin):
 
     @timer
     def execute_report(self):
+        """
+        Executes the script to create a report in Excel format.
+        """
         print()
 
         male_df, female_df = self.get_empty_dataframes()

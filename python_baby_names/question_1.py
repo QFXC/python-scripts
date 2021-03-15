@@ -28,6 +28,9 @@ class Script(mixins.BabyNamesMixin):
 
     @timer
     def execute_report(self):
+        """
+        Executes the script to create a report in Excel format.
+        """
         print()
 
         male_name_key = 'male_names'
@@ -49,6 +52,7 @@ class Script(mixins.BabyNamesMixin):
         for index, filename in enumerate(filenames):
             html_file = open(f'{settings.RELATIVE_PATH}/{filename}', 'r')
             contents = html_file.read()
+
             soup = BeautifulSoup(contents, 'lxml')
             year = available_years[index]
             self.validate_year(year, soup)
