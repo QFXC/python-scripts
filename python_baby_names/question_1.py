@@ -115,5 +115,6 @@ class Script(mixins.BabyNamesMixin):
         print(f'Created: {output_path}')
 
 
-script = Script(NAME_QUANTITY_NEEDED)
-script.execute_report()
+if __name__ == '__main__':
+    script = Script(NAME_QUANTITY_NEEDED)
+    script.execute_report()

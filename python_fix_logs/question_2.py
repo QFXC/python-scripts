@@ -134,5 +134,6 @@ class ExecutionReportAnalyzer(mixins.FixLogMixin):
         print(f'Detailed Report Created: {output_path}')
 
 
-script = ExecutionReportAnalyzer(SYMBOL_TAG)
-script.execute_report()
+if __name__ == '__main__':
+    script = ExecutionReportAnalyzer(SYMBOL_TAG)
+    script.execute_report()

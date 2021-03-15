@@ -117,5 +117,6 @@ class Script(mixins.BabyNamesMixin):
         print(f'Created: {output_path}')
 
 
-script = Script(NAMES_IN_REPORT, excel_sheetname=EXCEL_SHEETNAME)
-script.execute_report()
+if __name__ == '__main__':
+    script = Script(NAMES_IN_REPORT, excel_sheetname=EXCEL_SHEETNAME)
+    script.execute_report()

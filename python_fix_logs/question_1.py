@@ -128,5 +128,6 @@ class OrderStatusAnalyzer(mixins.FixLogMixin):
         print(f'Created: {output_path}')
 
 
-script = OrderStatusAnalyzer(CATEGORIES_NEEDED)
-script.execute_report()
+if __name__ == '__main__':
+    script = OrderStatusAnalyzer(CATEGORIES_NEEDED)
+    script.execute_report()
