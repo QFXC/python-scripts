@@ -42,8 +42,8 @@ class Script(mixins.BabyNamesMixin):
         for index, filename in enumerate(filenames):
             html_file = open(f'{settings.RELATIVE_PATH}/{filename}', 'r')
             contents = html_file.read()
-            soup = BeautifulSoup(contents, 'html.parser')
 
+            soup = BeautifulSoup(contents, 'lxml')
             year = available_years[index]
             self.validate_year(year, soup)
             table = self.get_table(soup)
