@@ -42,7 +42,6 @@ class Script2(original.Script):
         for index, filename in enumerate(filenames):
             html_file = open(f'{settings.RELATIVE_PATH}/{filename}', 'r')
             contents = html_file.read()
-
             male_names = []
             female_names = []
             year = available_years[index]
@@ -51,18 +50,14 @@ class Script2(original.Script):
                 r'<td>.*</td><td>(\w+)</td>\<td>(\w+)</td>', contents)
 
             max_index = self.name_quantity_needed - 1
-            limited_matches = []
 
             for index, match in enumerate(matches):
                 if index <= max_index:
-                    limited_matches.append(match)
+                    male_name, female_name = match.groups()
+                    male_names.append(male_name)
+                    female_names.append(female_name)
                 else:
                     break
-
-            for match in limited_matches:
-                male_name, female_name = match.groups()
-                male_names.append(male_name)
-                female_names.append(female_name)
 
             report[male_name_key][year] = male_names
             report[female_name_key][year] = female_names
