@@ -47,11 +47,20 @@ class Script2(original.Script):
             female_names = []
             year = available_years[index]
 
-            results = re.findall(
+            matches = re.finditer(
                 r'<td>.*</td><td>(\w+)</td>\<td>(\w+)</td>', contents)
 
-            for group in results[:self.name_quantity_needed]:
-                male_name, female_name = group
+            max_index = self.name_quantity_needed - 1
+            limited_matches = []
+
+            for index, match in enumerate(matches):
+                if index <= max_index:
+                    limited_matches.append(match)
+                else:
+                    break
+
+            for match in limited_matches:
+                male_name, female_name = match.groups()
                 male_names.append(male_name)
                 female_names.append(female_name)
 
